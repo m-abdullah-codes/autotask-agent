@@ -246,3 +246,4 @@ MIT License — feel free to use this as a template for your own agent projects.
 ## 🙋 Author
 
 Built as a portfolio project to demonstrate agentic AI architecture using LangChain and Fireworks AI.# autotask-agent
+# autotask-agent
