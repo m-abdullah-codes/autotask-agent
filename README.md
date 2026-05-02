@@ -121,7 +121,7 @@ autotask-agent/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/autotask-agent.git
+git clone https://github.com/m-abdullah-codes/autotask-agent.git
 cd autotask-agent
 ```
 
@@ -245,5 +245,4 @@ MIT License — feel free to use this as a template for your own agent projects.
 
 ## 🙋 Author
 
-Built as a portfolio project to demonstrate agentic AI architecture using LangChain and Fireworks AI.# autotask-agent
-# autotask-agent
+Built as a portfolio project to demonstrate agentic AI architecture using LangChain and Fireworks AI.

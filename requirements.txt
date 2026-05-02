@@ -1,0 +1,14 @@
+langchain
+langchain-anthropic
+langchain-fireworks
+langchain-google-community[gmail]
+google-api-python-client
+google-auth-oauthlib
+notion-client
+chromadb
+sentence-transformers
+streamlit
+pydantic
+python-dotenv
+langchain-community
+langchain-classic

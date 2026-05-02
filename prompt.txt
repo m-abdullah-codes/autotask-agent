@@ -1,0 +1,295 @@
+here is what my tutor told me:
+
+Great questions! Let me answer both parts clearly.
+
+Part 1: Which Tools Are Pre-built vs Custom?
+
+Gmail
+
+LangChain has a built-in Gmail toolkit (langchain-google-community). It gives you tools like GmailSearch, GmailGetMessage, GmailSendMessage out of the box. ✅
+
+
+
+Google Calendar
+
+No official LangChain tool exists. You'll build it yourself using the Google Calendar API. But it's just a Python function with a @tool decorator — not hard at all. 🔨
+
+
+
+Notion
+
+No official LangChain tool exists. You'll build it using the notion-client Python library + @tool decorator. 🔨
+
+
+
+Summarizer
+
+This is just an LLM call wrapped as a tool — maybe 10 lines of code. Very easy to build. 🔨
+
+So in short — Gmail is handed to you, the other three you build yourself. But "building" them just means writing a normal Python function that calls an API, then slapping @tool on top. LangChain does the rest.
+
+Part 2: Exact Development Flow — File by File
+
+Follow this order strictly. Each step builds on the previous one.
+
+🟢 Phase 1: Setup (Day 1)
+
+1. Create project folder + virtual environment
+
+
+
+mkdir autotask-agent && cd autotask-agent
+
+python -m venv venv
+
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+2. Create .env first
+
+
+
+ANTHROPIC_API_KEY=your_key_here
+
+GOOGLE_CLIENT_ID=...
+
+GOOGLE_CLIENT_SECRET=...
+
+NOTION_TOKEN=...
+
+3. Write requirements.txt and install
+
+
+
+langchain
+
+langchain-anthropic
+
+langchain-google-community[gmail]
+
+google-api-python-client
+
+google-auth-oauthlib
+
+notion-client
+
+chromadb
+
+sentence-transformers
+
+streamlit
+
+pydantic
+
+python-dotenv
+
+pip install -r requirements.txt
+
+4. Write config/settings.py
+
+This file just loads your .env variables using python-dotenv. Write this once, import everywhere.
+
+🟡 Phase 2: Build Tools One by One (Days 2–6)
+
+Write and test each tool in isolation before touching the agent. This is important — don't wire everything together until each tool works on its own.
+
+5. Write tools/gmail_tool.py (using LangChain's built-in)
+
+Just set up the Gmail toolkit and verify you can fetch emails. Run it standalone:
+
+
+
+python tools/gmail_tool.py
+
+✅ Goal: Print 5 emails in your terminal.
+
+6. Write tools/summarizer_tool.py (build it — easiest one)
+
+Do this second because it only needs your Anthropic API key — no Google/Notion setup. It's just:
+
+
+
+from langchain_anthropic import ChatAnthropic
+
+from langchain.tools import tool
+
+
+
+@tool
+
+def summarize_text(text: str) -> str:
+
+    """Summarizes a given piece of text."""
+
+    llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+
+    return llm.invoke(f"Summarize this briefly: {text}").content
+
+✅ Goal: Pass it a paragraph, get a summary back.
+
+7. Write tools/calendar_tool.py (build it)
+
+Use Google Calendar API to create an event. One function, one @tool decorator.
+
+✅ Goal: Run it, see a test event appear in your Google Calendar.
+
+8. Write tools/notion_tool.py (build it)
+
+Use notion-client to create a page/task in a Notion database.
+
+✅ Goal: Run it, see a test task appear in your Notion workspace.
+
+🟠 Phase 3: Build the Agent (Days 7–9)
+
+Now that all tools work individually, wire them into the agent.
+
+9. Write schemas/email_schema.py and schemas/task_schema.py
+
+Pydantic models for structured data. For example:
+
+
+
+from pydantic import BaseModel
+
+
+
+class EmailSummary(BaseModel):
+
+    subject: str
+
+    sender: str
+
+    priority: str   # "high", "medium", "low"
+
+    action: str     # "reply", "archive", "create_task"
+
+These keep your data clean and typed throughout the agent.
+
+10. Write agent/prompts.py
+
+Write the system prompt that tells the agent its personality, goal, and rules. This is more important than beginners think — a bad prompt gives a bad agent.
+
+
+
+from langchain.prompts import ChatPromptTemplate
+
+
+
+SYSTEM_PROMPT = """
+
+You are AutoTask, a personal productivity assistant.
+
+Your job is to help the user manage emails, schedule calendar events, and create Notion tasks.
+
+Always confirm with the user before sending emails or deleting anything.
+
+Today's date is {date}.
+
+"""
+
+11. Write agent/memory.py
+
+Set up ConversationBufferMemory for short-term memory. Just a small file, imported by the agent.
+
+12. Write agent/agent.py ← The most important file
+
+This is where everything comes together:
+
+
+
+from langchain.agents import create_react_agent, AgentExecutor
+
+from langchain_anthropic import ChatAnthropic
+
+from langchain import hub
+
+from tools.gmail_tool import ...
+
+from tools.calendar_tool import ...
+
+from tools.notion_tool import ...
+
+from tools.summarizer_tool import summarize_text
+
+from agent.memory import memory
+
+
+
+llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+
+tools = [gmail_tool, calendar_tool, notion_tool, summarize_text]
+
+prompt = hub.pull("hwchase17/react")
+
+
+
+agent = create_react_agent(llm, tools, prompt)
+
+executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True)
+
+✅ Goal: Run it with a hardcoded input like "Check my emails" and see the agent reasoning in your terminal (verbose=True shows every step).
+
+13. Write main.py
+
+Just a simple loop that takes user input and passes it to the executor:
+
+
+
+from agent.agent import executor
+
+
+
+while True:
+
+    user_input = input("You: ")
+
+    if user_input == "quit":
+
+        break
+
+    result = executor.invoke({"input": user_input})
+
+    print("Agent:", result["output"])
+
+✅ Goal: Have a full conversation with your agent in the terminal.
+
+🔵 Phase 4: UI + Polish (Days 10–14)
+
+14. Write ui/app.py
+
+Simple Streamlit chat interface. Chat input at the bottom, agent responses displayed above. Nothing fancy — just enough to demo visually.
+
+15. Write README.md
+
+Include: what it does, architecture diagram, setup instructions, demo GIF/video. This is what employers actually read.
+
+The Full Order — Quick Reference
+
+Day 1:  .env → requirements.txt → config/settings.py
+
+Day 2:  tools/gmail_tool.py        (test it alone)
+
+Day 3:  tools/summarizer_tool.py   (test it alone)
+
+Day 4:  tools/calendar_tool.py     (test it alone)
+
+Day 5:  tools/notion_tool.py       (test it alone)
+
+Day 6:  schemas/                   (Pydantic models)
+
+Day 7:  agent/prompts.py
+
+Day 8:  agent/memory.py
+
+Day 9:  agent/agent.py + main.py   (full agent working in terminal)
+
+Day 10-12: ui/app.py               (Streamlit UI)
+
+Day 13-14: README + demo video
+
+The golden rule: never move to the next file until the current one works. Each file is a small, testable unit. This way you always know exactly where a bug is coming from.
+
+
+
+
+
+I am following him, i am using langchain-fireworks instead of langchain-anthropic, i am starting the 5th step, the tools/gmail_tool.py, now give me the code for that, guide me teach me and explain to me how it works and tell me how will i make it work

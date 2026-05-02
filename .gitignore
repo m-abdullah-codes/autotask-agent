@@ -1,0 +1,81 @@
+# =====================
+# Python
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+venv.bak/
+*.egg-info/
+dist/
+build/
+
+# =====================
+# Environment variables
+# =====================
+.env
+.env.*
+!.env.example
+
+# =====================
+# Streamlit
+# =====================
+.streamlit/secrets.toml
+
+# =====================
+# Jupyter Notebook
+# =====================
+.ipynb_checkpoints/
+
+# =====================
+# Logs
+# =====================
+*.log
+logs/
+
+# =====================
+# IDEs
+# =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# HuggingFace / Transformers cache
+# =====================
+.cache/
+huggingface/
+transformers_cache/
+hf_cache/
+
+# =====================
+# LangChain / LangSmith (optional)
+# =====================
+.langchain/
+.langsmith/
+
+# =====================
+# Node (if Streamlit frontend ever expands)
+# =====================
+node_modules/
+
+# =====================
+# Temporary files
+# =====================
+tmp/
+temp/
+*.tmp
+
+credentials.json
+token.json
